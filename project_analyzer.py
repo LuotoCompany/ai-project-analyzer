@@ -528,7 +528,7 @@ def main():
     parser.add_argument(
         "--ext",
         required=True,
-        help="File extensions to include (e.g., ts,js)"
+        help="File extensions to include (e.g., ts,js,noext). Use 'noext' to include files without extension"
     )
     parser.add_argument(
         "--batch-size",
@@ -540,8 +540,16 @@ def main():
 
     # Convert extensions to glob patterns
     extensions = args.ext.split(',')
-    include_patterns = ','.join(f'*.{ext.strip()}' for ext in extensions)
-    analyzer = ProjectAnalyzer(args.path, include_patterns, args.batch_size)
+    include_patterns = []
+    for ext in extensions:
+        ext = ext.strip()
+        if ext.lower() == 'noext':
+            # Match files with no extension
+            include_patterns.append('[!.]*')  # Matches any filename not containing a dot
+        else:
+            include_patterns.append(f'*.{ext}')
+    
+    analyzer = ProjectAnalyzer(args.path, ','.join(include_patterns), args.batch_size)
     analyzer.process_project()
 
 
